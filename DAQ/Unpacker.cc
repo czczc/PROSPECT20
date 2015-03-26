@@ -217,7 +217,7 @@ void Unpacker::ReadHeader(ifstream& rawDataFile)
         name = name.ReplaceAll(".dat", "");
         name = name.ReplaceAll("P20_", "");
         TObjArray *tx = name.Tokenize("-");
-        if (! tx->GetEntries() == 6) {
+        if (tx->GetEntries() != 6) {
             cout << "warning: file name not in datetime format." << endl;
         }
         TTimeStamp ts(
