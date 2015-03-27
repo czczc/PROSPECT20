@@ -39,10 +39,16 @@ void WFAnalyzer::Reset()
 {
     baseline = 0;
     nPulse = 0;
-    charges.clear();
-    peaks.clear();
+    charges_integral.clear();
+    charges_peak.clear();
     tdcs_start.clear();
     tdcs_end.clear();
+    tdcs_thresh.clear();
+    tdcs_peak.clear();
+    tdcs_prepeak_low.clear();
+    tdcs_prepeak_high.clear();
+    tdcs_postpeak_low.clear();
+    tdcs_postpeak_high.clear();
 
     maxCharge = 0;
     riseTime = 0;
@@ -72,7 +78,7 @@ void WFAnalyzer::ProcessBaseline()
 // ------------------------------------
 void WFAnalyzer::ProcessQT()
 {
-    vector<int> cleanTrace(wf_size);
+    vector<double> cleanTrace(wf_size);
     for (int i=0; i<wf_size; i++) {
         cleanTrace[i] = baseline - (*fWf)[i];
         // cout << cleanTrace[i] << " ";
@@ -85,32 +91,83 @@ void WFAnalyzer::ProcessQT()
     double charge = 0;
     double peak = 0;
     double tdc = 0;
+    double tdc_start = 0;
+    double tdc_end = 0;
+    double tdc_peak = 0;
+    // double tdc_prepeak_low = 0;
+    // double tdc_prepeak_high = 0;
+    // double tdc_postpeak_low = 0;
+    // double tdc_postpeak_high = 0;
     bool foundPulse = false;
-    const int THRESHOLD = 5; // threshold for register a pulse and for tdc start 
-    for (int i=0; i<wf_size-1; i++) {
+    for (int i=1; i<wf_size-1; i++) {
         if (cleanTrace[i]>0 && cleanTrace[i+1]>0) {
             foundPulse = true;
+            if (tdc_start <0.1) {
+                // tdc_start = i;
+                tdc_start = xArrayInterpLinear(i-1, cleanTrace, 0);
+            }
             charge += cleanTrace[i];
-            if (peak < cleanTrace[i]) peak = cleanTrace[i];
-            if(i>0 && tdc<0.1 && cleanTrace[i-1]<THRESHOLD && cleanTrace[i]>=THRESHOLD) tdc = i-1;
+            if (peak < cleanTrace[i]) {
+                peak = cleanTrace[i];
+                tdc_peak = i;
+            }
+            if(i>0 && tdc<0.1 && cleanTrace[i-1]<PULSE_THRESH && cleanTrace[i]>=PULSE_THRESH) tdc = i-1;
         }
         else {
             if(foundPulse && tdc>0.1) {
-                charges.push_back(charge);
-                peaks.push_back(peak);
-                tdcs_start.push_back(tdc);
-                tdcs_end.push_back(i);
+                charges_integral.push_back(charge);
+                charges_peak.push_back(peak);
+                tdcs_thresh.push_back(tdc);
+                tdcs_start.push_back(tdc_start);
+                // tdcs_end.push_back(i);
+                tdc_end = xArrayInterpLinear(i, cleanTrace, 0);
+                tdcs_end.push_back(tdc_end);
+                tdcs_peak.push_back(tdc_peak);
+
+                double low_adc  = peak * LOW_PEAK_PERCENT / 100.;
+                double high_adc = peak * HIGH_PEAK_PERCENT / 100.;
+
+                int j = tdc_peak;
+                while (cleanTrace[j] > high_adc && j>tdc_start) j--;
+                // tdcs_prepeak_high.push_back(j);
+                // if (j<=tdc_start) tdcs_prepeak_high.push_back(tdc_start);
+                tdcs_prepeak_high.push_back( xArrayInterpLinear(j, cleanTrace, high_adc) );
+
+                while (cleanTrace[j] > low_adc && j>tdc_start) j--;
+                // tdcs_prepeak_low.push_back(j);
+                // if (j<=tdc_start) tdcs_prepeak_low.push_back(tdc_start);
+                tdcs_prepeak_low.push_back( xArrayInterpLinear(j, cleanTrace, low_adc) );
+
+                j = tdc_peak;
+                while (cleanTrace[j] > high_adc && j<tdc_end) j++;
+                // tdcs_postpeak_high.push_back(j);
+                // if (j>=tdc_end) tdcs_postpeak_high.push_back(tdc_end);
+                tdcs_postpeak_high.push_back( xArrayInterpLinear(j-1, cleanTrace, high_adc) );
+
+                while (cleanTrace[j] > low_adc && j<tdc_end) j++;
+                // tdcs_postpeak_low.push_back(j);
+                // if (j>=tdc_end) tdcs_postpeak_low.push_back(tdc_end);
+                tdcs_postpeak_low.push_back( xArrayInterpLinear(j-1, cleanTrace, low_adc) );
             }
             charge = 0;
             peak=0;
             tdc = 0;
+            tdc_start = 0;
+            tdc_end = 0;
+            tdc_peak = 0;
             foundPulse = false;
         }
     }
-    nPulse = charges.size();
+    nPulse = charges_integral.size();
     cout << "nPulse: " << nPulse << endl;
     for (int i=0; i< nPulse; i++) {
-        cout << charges[i] << " at (" << tdcs_start[i]*4 << ", " << tdcs_end[i]*4 << ")" << endl;
+        cout << charges_integral[i] << " at (" << tdcs_start[i]*4 << ", " << tdcs_end[i]*4 << ") " 
+        << headWidth(i) << ", "
+        << prepeakWidth(i) << ", "
+        << peakWidth(i) << ", "
+        << postpeakWidth(i) << ", "
+        << tailWidth(i) << ", "
+        << endl;
     }
     cout << endl;
 
@@ -118,9 +175,9 @@ void WFAnalyzer::ProcessQT()
     riseTime = 0;
     totalCharge = 0;
     for (int i=0; i<nPulse; i++) {
-        totalCharge += charges[i];
-        if (charges[i] > maxCharge) {
-            maxCharge = charges[i];
+        totalCharge += charges_integral[i];
+        if (charges_integral[i] > maxCharge) {
+            maxCharge = charges_integral[i];
             riseTime = tdcs_start[i] * 4;  // 4 ns per sample
         }
     }

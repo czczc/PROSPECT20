@@ -22,6 +22,7 @@
 #include "TH2F.h"
 #include "TFile.h"
 #include "TBox.h"
+#include "TLine.h"
 
 #include <exception>
 #include <iostream>
@@ -279,15 +280,38 @@ void GuiController::DrawPulses(int wfNo, int padNo)
 
     WFAnalyzer *w = &wfa[wfNo];
 
+    // bool showLines = true;
+    bool showLines = false;
     for (int i=0; i<w->nPulse; i++) {
         double start = w->tdcs_start[i]*4;
         double end = w->tdcs_end[i]*4;
-        TBox *b = new TBox(start, w->baseline, end, w->baseline - w->peaks[i]);
+        TBox *b = new TBox(start, w->baseline, end, w->baseline - w->charges_peak[i]);
         b->SetLineColor(kOrange+7);
         // b->SetFillColor(kCyan-9);
         b->SetFillStyle(0);
         b->Draw();
         listOfDrawables.push_back(b);
+        if (!showLines) continue;
+        TLine *l0 = new TLine(w->tdcs_peak[i]*4, w->baseline, w->tdcs_peak[i]*4, w->baseline - w->charges_peak[i]);
+        l0->SetLineColor(kGreen-2);
+        l0->Draw();
+        listOfDrawables.push_back(l0);
+        TLine *l1 = new TLine(w->tdcs_prepeak_low[i]*4, w->baseline, w->tdcs_prepeak_low[i]*4, w->baseline - w->charges_peak[i]);
+        l1->SetLineColor(kBlue);
+        l1->Draw();
+        listOfDrawables.push_back(l1);
+        TLine *l2 = new TLine(w->tdcs_postpeak_low[i]*4, w->baseline, w->tdcs_postpeak_low[i]*4, w->baseline - w->charges_peak[i]);
+        l2->SetLineColor(kBlue);
+        l2->Draw();
+        listOfDrawables.push_back(l2);
+        TLine *l3 = new TLine(w->tdcs_prepeak_high[i]*4, w->baseline, w->tdcs_prepeak_high[i]*4, w->baseline - w->charges_peak[i]);
+        l3->SetLineColor(kMagenta-2);
+        l3->Draw();
+        listOfDrawables.push_back(l3);
+        TLine *l4 = new TLine(w->tdcs_postpeak_high[i]*4, w->baseline, w->tdcs_postpeak_high[i]*4, w->baseline - w->charges_peak[i]);
+        l4->SetLineColor(kMagenta-2);
+        l4->Draw();
+        listOfDrawables.push_back(l4);
     }
 
 }
