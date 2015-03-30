@@ -34,6 +34,7 @@ GuiController::GuiController(const TGWindow *p, int w, int h)
 
     baseDir = baseDir + gSystem->DirName(__FILE__) + "/..";
     event = 0;
+    currentShowWFLines = false;
 
     mw = new MainWindow(p, w, h);
 
@@ -76,6 +77,7 @@ void GuiController::InitConnections()
     cw->fEventEntry->Connect("ReturnPressed()", "GuiController", this, "Jump()");
     cw->fNextCIButton->Connect("Clicked()", "GuiController", this, "FindNextCoincidence()");
     cw->fNextMuonButton->Connect("Clicked()", "GuiController", this, "FindNextMuon()");
+    cw->showWFLinesButton->Connect("Clicked()", "GuiController", this, "UpdateShowWFLines()");
 
 }
 
@@ -157,6 +159,24 @@ void GuiController::FindNextMuon()
 }
 
 //-------------------------------------------------
+void GuiController::UpdateShowWFLines()
+{
+    currentShowWFLines = !currentShowWFLines;
+    Reload();
+
+    // if (cw->showWFLinesButton->IsDown()) {
+    //     if (currentShowWFLines == true) return;
+    //     currentShowWFLines = true;
+    //     Reload();
+    // }
+    // else {
+    //     if (currentShowMC == false) return;
+    //     currentShowMC = false;
+    //     HideTrack();
+    // }
+
+}
+//-------------------------------------------------
 void GuiController::Reload()
 {    
     ClearListOfDrawables();
@@ -191,8 +211,10 @@ void GuiController::Reload()
     DrawWF(*(event->channelData6), 3, 3);
     DrawWF(*(event->channelData5), 2, 3);
 
-    DrawPulses(0, 1);
-    DrawPulses(1, 2);
+    if (currentShowWFLines) {
+        DrawPulses(0, 1);
+        DrawPulses(1, 2);
+    }
 
     // event->PrintInfo(1);
     event->PrintInfo();
@@ -280,8 +302,7 @@ void GuiController::DrawPulses(int wfNo, int padNo)
 
     WFAnalyzer *w = &wfa[wfNo];
 
-    // bool showLines = true;
-    bool showLines = false;
+    // bool showLines = false;
     for (int i=0; i<w->nPulse; i++) {
         double start = w->tdcs_start[i]*4;
         double end = w->tdcs_end[i]*4;
@@ -291,7 +312,6 @@ void GuiController::DrawPulses(int wfNo, int padNo)
         b->SetFillStyle(0);
         b->Draw();
         listOfDrawables.push_back(b);
-        if (!showLines) continue;
         TLine *l0 = new TLine(w->tdcs_peak[i]*4, w->baseline, w->tdcs_peak[i]*4, w->baseline - w->charges_peak[i]);
         l0->SetLineColor(kGreen-2);
         l0->Draw();
@@ -312,6 +332,10 @@ void GuiController::DrawPulses(int wfNo, int padNo)
         l4->SetLineColor(kMagenta-2);
         l4->Draw();
         listOfDrawables.push_back(l4);
+        TLine *l5 = new TLine(w->tdcs_thresh[i]*4, w->baseline, w->tdcs_thresh[i]*4, w->baseline - w->charges_peak[i]);
+        l5->SetLineColor(kGray);
+        l5->Draw();
+        listOfDrawables.push_back(l5);
     }
 
 }

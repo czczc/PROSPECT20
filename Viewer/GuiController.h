@@ -41,10 +41,12 @@ public:
     void Jump();
     void FindNextCoincidence();
     void FindNextMuon();
+    void UpdateShowWFLines();
 
     void DrawWF(std::vector<unsigned short>& ch, int wfNo, int padNo);
     void DrawPulses(int wfNo, int padNo);
 
+    bool currentShowWFLines;
 
     // TGraph *gWF[3]; // previous, current, next waveform
     // TGraph *gMu[2][3]; // previous, current, next waveform of the two muon paddles

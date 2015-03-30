@@ -6,6 +6,7 @@
 class InfoWindow;
 class TGTextButton;
 class TGNumberEntryField;
+class TGCheckButton;
 
 class ControlWindow: public TGVerticalFrame
 {
@@ -20,8 +21,9 @@ public:
 
     TGTextButton       *fNextCIButton;
     TGTextButton       *fNextMuonButton;
-    // TGTextButton       *fUnZoomButton;
     
+    TGCheckButton      *showWFLinesButton;
+
     ClassDef(ControlWindow, 0)
 };
 

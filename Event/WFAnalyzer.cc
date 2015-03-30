@@ -10,13 +10,15 @@ using namespace std;
 
 // ------------------------------------
 WFAnalyzer::WFAnalyzer():
-fWf(0)
+fWf(0),
+ordered_index(0)
 {
 }
 
 // ------------------------------------
 WFAnalyzer::WFAnalyzer(std::vector<unsigned short>* wf):
-fWf(wf)
+fWf(wf),
+ordered_index(0)
 {
 }
 
@@ -32,6 +34,7 @@ void WFAnalyzer::Process()
     Reset();
     ProcessBaseline();
     ProcessQT();
+    Summarize();
 }
 
 // ------------------------------------
@@ -50,8 +53,13 @@ void WFAnalyzer::Reset()
     tdcs_postpeak_low.clear();
     tdcs_postpeak_high.clear();
 
+    if (ordered_index) {
+        delete ordered_index;
+        ordered_index = 0;
+    }
+
     maxCharge = 0;
-    riseTime = 0;
+    maxPeak = 0;
     totalCharge = 0;
 }
 
@@ -111,7 +119,10 @@ void WFAnalyzer::ProcessQT()
                 peak = cleanTrace[i];
                 tdc_peak = i;
             }
-            if(i>0 && tdc<0.1 && cleanTrace[i-1]<PULSE_THRESH && cleanTrace[i]>=PULSE_THRESH) tdc = i-1;
+            if(i>0 && tdc<0.1 && cleanTrace[i-1]<PULSE_THRESH && cleanTrace[i]>=PULSE_THRESH) {
+                // tdc = i-1;
+                tdc = xArrayInterpLinear(i-1, cleanTrace, PULSE_THRESH);
+            }
         }
         else {
             if(foundPulse && tdc>0.1) {
@@ -130,23 +141,19 @@ void WFAnalyzer::ProcessQT()
                 int j = tdc_peak;
                 while (cleanTrace[j] > high_adc && j>tdc_start) j--;
                 // tdcs_prepeak_high.push_back(j);
-                // if (j<=tdc_start) tdcs_prepeak_high.push_back(tdc_start);
                 tdcs_prepeak_high.push_back( xArrayInterpLinear(j, cleanTrace, high_adc) );
 
                 while (cleanTrace[j] > low_adc && j>tdc_start) j--;
                 // tdcs_prepeak_low.push_back(j);
-                // if (j<=tdc_start) tdcs_prepeak_low.push_back(tdc_start);
                 tdcs_prepeak_low.push_back( xArrayInterpLinear(j, cleanTrace, low_adc) );
 
                 j = tdc_peak;
                 while (cleanTrace[j] > high_adc && j<tdc_end) j++;
                 // tdcs_postpeak_high.push_back(j);
-                // if (j>=tdc_end) tdcs_postpeak_high.push_back(tdc_end);
                 tdcs_postpeak_high.push_back( xArrayInterpLinear(j-1, cleanTrace, high_adc) );
 
                 while (cleanTrace[j] > low_adc && j<tdc_end) j++;
                 // tdcs_postpeak_low.push_back(j);
-                // if (j>=tdc_end) tdcs_postpeak_low.push_back(tdc_end);
                 tdcs_postpeak_low.push_back( xArrayInterpLinear(j-1, cleanTrace, low_adc) );
             }
             charge = 0;
@@ -171,14 +178,26 @@ void WFAnalyzer::ProcessQT()
     }
     cout << endl;
 
-    maxCharge = 0;
-    riseTime = 0;
-    totalCharge = 0;
+    ordered_index = new int[nPulse];
+    TMath::Sort(nPulse, &(charges_integral[0]), ordered_index);
+
+    cout << "ordered: ";
+    for (int i=0; i<nPulse; i++) {
+        cout << ordered_index[i] << ", ";
+    }
+    cout << endl;
+
+}
+
+// ------------------------------------
+void WFAnalyzer::Summarize()
+{
+    if (nPulse==0) return;
+    maxCharge = charges_integral[ordered_index[0]];
     for (int i=0; i<nPulse; i++) {
         totalCharge += charges_integral[i];
-        if (charges_integral[i] > maxCharge) {
-            maxCharge = charges_integral[i];
-            riseTime = tdcs_start[i] * 4;  // 4 ns per sample
+        if (charges_peak[i] > maxPeak) {
+            maxPeak = charges_peak[i];
         }
     }
 }

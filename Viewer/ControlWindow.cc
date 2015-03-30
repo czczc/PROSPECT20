@@ -34,6 +34,11 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     fNextMuonButton = new TGTextButton(this, "Find Next Muon");
     AddFrame(fNextMuonButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2)); 
 
+    showWFLinesButton = new TGCheckButton(this, "Show Waveform Lines");
+    AddFrame(showWFLinesButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    showWFLinesButton->SetState(kButtonUp);
+
+
 }
 
 ControlWindow::~ControlWindow()

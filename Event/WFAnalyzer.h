@@ -14,6 +14,7 @@ public:
     void Process();
     void ProcessBaseline();
     void ProcessQT();
+    void Summarize();
     
     enum SETTING {
         PULSE_THRESH = 5, // threshold for register a pulse and for tdc start 
@@ -36,6 +37,8 @@ public:
     std::vector<double> tdcs_postpeak_low;
     std::vector<double> tdcs_postpeak_high;
 
+    int *ordered_index; // index of the sorted charges_integral, from high to low
+
     // convenient methods for calculated pulse shape variables, return values all in tdc.
     double prepeakWidth(int i) { return tdcs_prepeak_high[i] - tdcs_prepeak_low[i]; }
     double postpeakWidth(int i) { return tdcs_postpeak_low[i] - tdcs_postpeak_high[i]; }
@@ -43,8 +46,9 @@ public:
     double headWidth(int i) { return tdcs_prepeak_low[i] - tdcs_start[i]; }
     double tailWidth(int i) { return tdcs_end[i] - tdcs_postpeak_low[i]; }
 
+    // summarized info for this waveform (all pulses)
     double maxCharge;
-    double riseTime;
+    double maxPeak;
     double totalCharge;
 
     int wf_size;
