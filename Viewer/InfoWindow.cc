@@ -39,14 +39,17 @@ void InfoWindow::DrawEventInfo(DAQEvent *event, WFAnalyzer& wfa1, WFAnalyzer& wf
 {
     ClearCanvas();
     vector<TString> lines;
-    lines.push_back(Form("      Event: %i", event->eventNo));
+    lines.push_back(Form("      Event: %i"        , event->eventNo));
     lines.push_back(Form("   baseline: %.0f, %.0f", wfa1.baseline, wfa2.baseline));
-    lines.push_back(Form("    nPulse: %i, %i", wfa1.nPulse, wfa2.nPulse));
-    lines.push_back(Form("  maxCharge: %.0f, %.0f", wfa1.maxCharge, wfa2.maxCharge));
+    lines.push_back(Form("     nPulse: %i, %i"    , wfa1.nPulse, wfa2.nPulse));
     lines.push_back(Form("totalCharge: %.0f, %.0f", wfa1.totalCharge, wfa2.totalCharge));
-    lines.push_back(Form("    maxPeak: %.0f, %.0f", wfa1.maxPeak, wfa2.maxPeak));
+    lines.push_back(Form("  maxCharge: %.0f, %.0f", wfa1.maxCharge, wfa2.maxCharge));
+    lines.push_back(Form("  2ndCharge: %.0f, %.0f", wfa1.secondCharge, wfa2.secondCharge));
+    lines.push_back(Form("   firstTdc: %.1f, %.1f", wfa1.firstTdc*4, wfa2.firstTdc*4));
+    lines.push_back(Form("    peakTdc: %.1f, %.1f", wfa1.peakTdc*4, wfa2.peakTdc*4));
+    lines.push_back(Form(" 2ndPeakTdc: %.1f, %.1f", wfa1.secondPeakTdc*4, wfa2.secondPeakTdc*4));
 
-    float startx = 0.05;
+    float startx = 0.02;
     float starty = 0.9;
     size_t size = lines.size();
     for (size_t i=0; i<size; i++) {
@@ -54,7 +57,7 @@ void InfoWindow::DrawEventInfo(DAQEvent *event, WFAnalyzer& wfa1, WFAnalyzer& wf
         listOfDrawables.push_back(tex);
         tex->SetNDC();
         tex->SetTextFont(102);
-        tex->SetTextSize(0.08);
+        tex->SetTextSize(0.07);
         tex->Draw();
     }
 

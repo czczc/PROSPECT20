@@ -59,8 +59,12 @@ void WFAnalyzer::Reset()
     }
 
     maxCharge = 0;
+    secondCharge = 0;
     maxPeak = 0;
     totalCharge = 0;
+    firstTdc = 0; // thresh tdc of the first pulse
+    peakTdc = 0;  // thresh tdc of the max charge pulse
+    secondPeakTdc = 0;  // thresh tdc of the second largest charge pulse
 }
 
 // ------------------------------------
@@ -194,6 +198,12 @@ void WFAnalyzer::Summarize()
 {
     if (nPulse==0) return;
     maxCharge = charges_integral[ordered_index[0]];
+    firstTdc = tdcs_thresh[0];
+    peakTdc = tdcs_thresh[ordered_index[0]];
+    if (nPulse>1) {
+        secondCharge = charges_integral[ordered_index[1]];
+        secondPeakTdc = tdcs_thresh[ordered_index[1]];
+    }
     for (int i=0; i<nPulse; i++) {
         totalCharge += charges_integral[i];
         if (charges_peak[i] > maxPeak) {

@@ -11,7 +11,7 @@ using namespace std;
 ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     :TGVerticalFrame(p, w, h)
 {    
-    fInfoWindow = new InfoWindow(this, w, 200); 
+    fInfoWindow = new InfoWindow(this, w, 300); 
     AddFrame(fInfoWindow, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
     
     // Navigation Frame

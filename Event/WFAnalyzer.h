@@ -48,8 +48,12 @@ public:
 
     // summarized info for this waveform (all pulses)
     double maxCharge;
+    double secondCharge;
     double maxPeak;
     double totalCharge;
+    double firstTdc; // thresh tdc of the first pulse
+    double peakTdc;  // thresh tdc of the max charge pulse
+    double secondPeakTdc;  // thresh tdc of the second largest charge pulse
 
     int wf_size;
 
