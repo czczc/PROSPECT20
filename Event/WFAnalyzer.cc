@@ -43,7 +43,10 @@ void WFAnalyzer::Reset()
     baseline = 0;
     nPulse = 0;
     charges_integral.clear();
-    charges_peak.clear();
+    adcs_peak.clear();
+    charges_prepeak.clear();
+    charges_postpeak.clear();
+    charges_tail.clear();
     tdcs_start.clear();
     tdcs_end.clear();
     tdcs_thresh.clear();
@@ -53,6 +56,7 @@ void WFAnalyzer::Reset()
     tdcs_postpeak_low.clear();
     tdcs_postpeak_high.clear();
 
+
     if (ordered_index) {
         delete ordered_index;
         ordered_index = 0;
@@ -60,7 +64,7 @@ void WFAnalyzer::Reset()
 
     maxCharge = 0;
     secondCharge = 0;
-    maxPeak = 0;
+    maxAdc = 0;
     totalCharge = 0;
     firstTdc = 0; // thresh tdc of the first pulse
     peakTdc = 0;  // thresh tdc of the max charge pulse
@@ -128,7 +132,7 @@ void WFAnalyzer::ProcessQT()
         else {
             if(foundPulse && tdc>0.1) {
                 charges_integral.push_back(charge);
-                charges_peak.push_back(peak);
+                adcs_peak.push_back(peak);
                 tdcs_thresh.push_back(tdc);
                 tdcs_start.push_back(tdc_start);
                 // tdcs_end.push_back(i);
@@ -144,18 +148,36 @@ void WFAnalyzer::ProcessQT()
                 // tdcs_prepeak_high.push_back(j);
                 tdcs_prepeak_high.push_back( xArrayInterpLinear(j, cleanTrace, high_adc) );
 
-                while (cleanTrace[j] > low_adc && j>tdc_start) j--;
+                float charge_prepeak = 0;
+                while (cleanTrace[j] > low_adc && j>tdc_start) {
+                    charge_prepeak += cleanTrace[j];
+                    j--;
+                }
                 // tdcs_prepeak_low.push_back(j);
                 tdcs_prepeak_low.push_back( xArrayInterpLinear(j, cleanTrace, low_adc) );
+                charges_prepeak.push_back(charge_prepeak);
 
                 j = tdc_peak;
                 while (cleanTrace[j] > high_adc && j<tdc_end) j++;
                 // tdcs_postpeak_high.push_back(j);
                 tdcs_postpeak_high.push_back( xArrayInterpLinear(j-1, cleanTrace, high_adc) );
 
-                while (cleanTrace[j] > low_adc && j<tdc_end) j++;
+                float charge_postpeak = 0;
+                while (cleanTrace[j] > low_adc && j<tdc_end) {
+                    charge_postpeak += cleanTrace[j];
+                    j++;
+                }
                 // tdcs_postpeak_low.push_back(j);
                 tdcs_postpeak_low.push_back( xArrayInterpLinear(j-1, cleanTrace, low_adc) );
+                charges_postpeak.push_back(charge_postpeak);
+
+                float charge_tail = 0;
+                while (cleanTrace[j]>0 && j<tdc_end) {
+                    charge_tail += cleanTrace[j];
+                    j++;
+                }
+                charges_tail.push_back(charge_tail);
+
             }
             charge = 0;
             peak=0;
@@ -178,20 +200,25 @@ void WFAnalyzer::PrintInfo()
 {
     cout << "nPulse: " << nPulse << endl;
     for (int i=0; i< nPulse; i++) {
-        cout << charges_integral[i] << " at (" << tdcs_start[i]*4 << ", " << tdcs_end[i]*4 << ") " 
-        << headWidth(i) << ", "
-        << prepeakWidth(i) << ", "
-        << peakWidth(i) << ", "
-        << postpeakWidth(i) << ", "
-        << tailWidth(i) << ", "
-        << endl;
+        cout << "charge: " << charges_integral[i] << " | " 
+            << charges_prepeak[i] << ", "
+            << charges_postpeak[i] << ", "
+            << charges_tail[i] 
+            << endl; 
+        cout << "  time: (" << tdcs_start[i]*4 << ", " << tdcs_end[i]*4 << ") " 
+            << headWidth(i) << ", "
+            << prepeakWidth(i) << ", "
+            << peakWidth(i) << ", "
+            << postpeakWidth(i) << ", "
+            << tailWidth(i) 
+            << endl;
     }
-    cout << endl;
-    cout << "ordered: ";
+    // cout << endl;
+    cout << "ordered index: ";
     for (int i=0; i<nPulse; i++) {
         cout << ordered_index[i] << ", ";
     }
-    cout << endl;
+    cout << endl << endl;
 
 }
 
@@ -208,8 +235,8 @@ void WFAnalyzer::Summarize()
     }
     for (int i=0; i<nPulse; i++) {
         totalCharge += charges_integral[i];
-        if (charges_peak[i] > maxPeak) {
-            maxPeak = charges_peak[i];
+        if (adcs_peak[i] > maxAdc) {
+            maxAdc = adcs_peak[i];
         }
     }
 }

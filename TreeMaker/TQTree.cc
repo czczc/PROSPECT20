@@ -21,7 +21,10 @@ TQTree::TQTree(const char* in, const char* out, int limit)
     event = new DAQEvent(in);
 
     charges_integral   = new vector<float>;
-    charges_peak       = new vector<float>;
+    adcs_peak          = new vector<float>;
+    charges_prepeak    = new vector<float>;
+    charges_postpeak   = new vector<float>;
+    charges_tail       = new vector<float>; 
     tdcs_start         = new vector<float>;
     tdcs_end           = new vector<float>;
     tdcs_thresh        = new vector<float>;
@@ -64,7 +67,7 @@ void TQTree::InitOutput(int pmtId)
     fTQTree->Branch("eventNo", &eventNo, "eventNo/i");
     fTQTree->Branch("nPulse", &nPulse, "nPulse/i");
     fTQTree->Branch("baseline", &baseline, "baseline/F");
-    fTQTree->Branch("maxCharge", &maxCharge, "maxCharge/F");
+    fTQTree->Branch("maxAdc", &maxAdc, "maxAdc/F");
     fTQTree->Branch("secondCharge", &secondCharge, "secondCharge/F");
     fTQTree->Branch("totalCharge", &totalCharge, "totalCharge/F");
     fTQTree->Branch("firstTdc", &firstTdc, "firstTdc/F");
@@ -72,7 +75,10 @@ void TQTree::InitOutput(int pmtId)
     fTQTree->Branch("secondPeakTdc", &secondPeakTdc, "secondPeakTdc/F");
     
     fTQTree->Branch("charges_integral", &charges_integral);
-    fTQTree->Branch("charges_peak", &charges_peak);
+    fTQTree->Branch("adcs_peak", &adcs_peak);
+    fTQTree->Branch("charges_prepeak", &charges_prepeak);
+    fTQTree->Branch("charges_postpeak", &charges_postpeak);
+    fTQTree->Branch("charges_tail", &charges_tail);
     fTQTree->Branch("tdcs_start", &tdcs_start);
     fTQTree->Branch("tdcs_end", &tdcs_end);
     fTQTree->Branch("tdcs_thresh", &tdcs_thresh);
@@ -93,7 +99,10 @@ void TQTree::Reset()
     // Make sure vectors are empty initially.
 
     charges_integral->clear();  
-    charges_peak->clear();      
+    adcs_peak->clear();  
+    charges_prepeak->clear();
+    charges_postpeak->clear();
+    charges_tail->clear();    
     tdcs_start->clear();        
     tdcs_end->clear();          
     tdcs_thresh->clear();       
@@ -126,7 +135,7 @@ void TQTree::Generate(int pmtId)
 
         nPulse = wfa.nPulse;
         baseline = wfa.baseline;
-        maxCharge = wfa.maxCharge;
+        maxAdc = wfa.maxAdc;
         secondCharge = wfa.secondCharge;
         totalCharge = wfa.totalCharge;
         firstTdc = wfa.firstTdc;
@@ -135,7 +144,12 @@ void TQTree::Generate(int pmtId)
 
         for (int j=0; j<nPulse; j++) {
             charges_integral->push_back(wfa.charges_integral[j]);
-            charges_peak->push_back(wfa.charges_peak[j]);
+            adcs_peak->push_back(wfa.adcs_peak[j]);
+            
+            charges_prepeak->push_back(wfa.charges_prepeak[j]);
+            charges_postpeak->push_back(wfa.charges_postpeak[j]);
+            charges_tail->push_back(wfa.charges_tail[j]);
+
             tdcs_start->push_back(wfa.tdcs_start[j]);
             tdcs_end->push_back(wfa.tdcs_end[j]);
             tdcs_thresh->push_back(wfa.tdcs_thresh[j]);
@@ -144,6 +158,7 @@ void TQTree::Generate(int pmtId)
             tdcs_prepeak_high->push_back(wfa.tdcs_prepeak_high[j]);
             tdcs_postpeak_low->push_back(wfa.tdcs_postpeak_low[j]);
             tdcs_postpeak_high->push_back(wfa.tdcs_postpeak_high[j]);
+
             ordered_index->push_back(wfa.ordered_index[j]);
         } // loop over pulses
 

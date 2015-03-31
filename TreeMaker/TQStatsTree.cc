@@ -48,11 +48,16 @@ void TQStatsTree::InitOutput()
     fTQStatsTree->Branch("nPulse", &nPulse, "nPulse/i");
     fTQStatsTree->Branch("chargeSum", &chargeSum, "chargeSum/F");
     fTQStatsTree->Branch("chargeDiff", &chargeDiff, "chargeDiff/F");
-    fTQStatsTree->Branch("peakSum", &peakSum, "peakSum/F");
-    fTQStatsTree->Branch("peakDiff", &peakDiff, "peakDiff/F");
+    fTQStatsTree->Branch("maxChargeSum", &maxChargeSum, "maxChargeSum/F");
+    fTQStatsTree->Branch("maxChargeDiff", &maxChargeDiff, "maxChargeDiff/F");
     fTQStatsTree->Branch("peakTdc", &peakTdc, "peakTdc/F");
     fTQStatsTree->Branch("tdcDiff", &tdcDiff, "tdcDiff/F");
-    
+
+    fTQStatsTree->Branch("charge_prepeak" , &charge_prepeak, "charge_prepeak[2]/F");
+    fTQStatsTree->Branch("charge_postpeak", &charge_postpeak, "charge_postpeak[2]/F");
+    fTQStatsTree->Branch("charge_tail"    , &charge_tail, "charge_tail[2]/F");
+    fTQStatsTree->Branch("charge_integral", &charge_integral, "charge_integral[2]/F");
+
     fTQStatsTree->Branch("width_head"    , &width_head, "width_head[2]/F");
     fTQStatsTree->Branch("width_prepeak" , &width_prepeak, "width_prepeak[2]/F");
     fTQStatsTree->Branch("width_peak"    , &width_peak, "width_peak[2]/F");
@@ -74,13 +79,18 @@ void TQStatsTree::Reset()
     nPulse = 0;
     chargeSum = 0;
     chargeDiff = 0;
-    peakSum = 0;
-    peakDiff = 0;
+    maxChargeSum = 0;
+    maxChargeDiff = 0;
     peakTdc = 0;
     tdcDiff = 0;
 
     // Make sure vectors are empty initially.
     for (int i=0; i<MAXPMT; i++) {
+        charge_prepeak[i] = 0;
+        charge_postpeak[i] = 0;
+        charge_tail[i] = 0;
+        charge_integral[i] = 0;
+
         width_head[i] = 0;
         width_prepeak[i] = 0;
         width_peak[i] = 0;
@@ -118,7 +128,7 @@ void TQStatsTree::Generate()
         for (int k=0; k<MAXPMT; k++) { wfa[k].Process(); }
 
         chargeDiff = wfa[0].totalCharge - wfa[1].totalCharge;
-        peakDiff = wfa[0].maxCharge - wfa[1].maxCharge;
+        maxChargeDiff = wfa[0].maxCharge - wfa[1].maxCharge;
         tdcDiff = wfa[0].peakTdc - wfa[1].peakTdc;
 
         for (int k=0; k<MAXPMT; k++) {
@@ -126,6 +136,11 @@ void TQStatsTree::Generate()
             if (w->nPulse == 0) continue;
 
             int id = w->ordered_index[0];
+
+            charge_prepeak[k] = w->charges_prepeak[id];
+            charge_postpeak[k] = w->charges_postpeak[id];
+            charge_tail[k] = w->charges_tail[id];
+            charge_integral[k] = w->charges_integral[id];
 
             width_head[k] = w->tdcs_prepeak_low[id] - w->tdcs_start[id];
             width_prepeak[k] = w->tdcs_prepeak_high[id] - w->tdcs_prepeak_low[id];
@@ -136,7 +151,7 @@ void TQStatsTree::Generate()
             nPMT++;
             nPulse += w->nPulse;
             chargeSum += w->totalCharge;
-            peakSum += w->maxCharge;
+            maxChargeSum += w->maxCharge;
 
             double tdc = w->peakTdc;
             if (peakTdc<0.1) { peakTdc = tdc; }

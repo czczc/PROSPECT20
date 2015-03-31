@@ -42,12 +42,17 @@ public:
     int nPulse;       // number of total pulses
     float chargeSum;  // charge1 + charge2
     float chargeDiff; // charge1 - charge2
-    float peakSum;    // maxCharge1 + maxCharge2
-    float peakDiff;   // maxCharge1 - maxCharge2
+    float maxChargeSum;    // maxCharge1 + maxCharge2
+    float maxChargeDiff;   // maxCharge1 - maxCharge2
     float peakTdc;    // earliest tdc of the max pulse of the 2 PMT
     float tdcDiff;    // difference in tdc between the two max pulse
 
-    // all following width are referring to the largest peak of the pulse
+    // all following variables are referring to the largest pulse
+    float charge_prepeak[MAXPMT];
+    float charge_postpeak[MAXPMT];
+    float charge_tail[MAXPMT];
+    float charge_integral[MAXPMT];
+
     float width_head[MAXPMT];
     float width_prepeak[MAXPMT];
     float width_peak[MAXPMT];

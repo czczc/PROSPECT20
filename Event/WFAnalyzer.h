@@ -28,7 +28,12 @@ public:
     float baseline;
     int nPulse;
     std::vector<float> charges_integral;
-    std::vector<float> charges_peak;
+    std::vector<float> adcs_peak;
+
+    std::vector<float> charges_prepeak;
+    std::vector<float> charges_postpeak;
+    std::vector<float> charges_tail;
+
     std::vector<float> tdcs_start;
     std::vector<float> tdcs_end;
     std::vector<float> tdcs_thresh;
@@ -50,7 +55,7 @@ public:
     // summarized info for this waveform (all pulses)
     float maxCharge;
     float secondCharge;
-    float maxPeak;
+    float maxAdc;
     float totalCharge;
     float firstTdc; // thresh tdc of the first pulse
     float peakTdc;  // thresh tdc of the max charge pulse

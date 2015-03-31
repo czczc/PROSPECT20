@@ -201,6 +201,8 @@ void GuiController::Reload()
     wfa[0].Process();
     wfa[1].SetWF(event->channelData1);
     wfa[1].Process();
+    wfa[0].PrintInfo();
+    wfa[1].PrintInfo();
 
     iw->DrawEventInfo(event, wfa[0], wfa[1]);
 
@@ -306,33 +308,33 @@ void GuiController::DrawPulses(int wfNo, int padNo)
     for (int i=0; i<w->nPulse; i++) {
         double start = w->tdcs_start[i]*4;
         double end = w->tdcs_end[i]*4;
-        TBox *b = new TBox(start, w->baseline, end, w->baseline - w->charges_peak[i]);
+        TBox *b = new TBox(start, w->baseline, end, w->baseline - w->adcs_peak[i]);
         b->SetLineColor(kOrange+7);
         // b->SetFillColor(kCyan-9);
         b->SetFillStyle(0);
         b->Draw();
         listOfDrawables.push_back(b);
-        TLine *l0 = new TLine(w->tdcs_peak[i]*4, w->baseline, w->tdcs_peak[i]*4, w->baseline - w->charges_peak[i]);
+        TLine *l0 = new TLine(w->tdcs_peak[i]*4, w->baseline, w->tdcs_peak[i]*4, w->baseline - w->adcs_peak[i]);
         l0->SetLineColor(kGreen-2);
         l0->Draw();
         listOfDrawables.push_back(l0);
-        TLine *l1 = new TLine(w->tdcs_prepeak_low[i]*4, w->baseline, w->tdcs_prepeak_low[i]*4, w->baseline - w->charges_peak[i]);
+        TLine *l1 = new TLine(w->tdcs_prepeak_low[i]*4, w->baseline, w->tdcs_prepeak_low[i]*4, w->baseline - w->adcs_peak[i]);
         l1->SetLineColor(kBlue);
         l1->Draw();
         listOfDrawables.push_back(l1);
-        TLine *l2 = new TLine(w->tdcs_postpeak_low[i]*4, w->baseline, w->tdcs_postpeak_low[i]*4, w->baseline - w->charges_peak[i]);
+        TLine *l2 = new TLine(w->tdcs_postpeak_low[i]*4, w->baseline, w->tdcs_postpeak_low[i]*4, w->baseline - w->adcs_peak[i]);
         l2->SetLineColor(kBlue);
         l2->Draw();
         listOfDrawables.push_back(l2);
-        TLine *l3 = new TLine(w->tdcs_prepeak_high[i]*4, w->baseline, w->tdcs_prepeak_high[i]*4, w->baseline - w->charges_peak[i]);
+        TLine *l3 = new TLine(w->tdcs_prepeak_high[i]*4, w->baseline, w->tdcs_prepeak_high[i]*4, w->baseline - w->adcs_peak[i]);
         l3->SetLineColor(kMagenta-2);
         l3->Draw();
         listOfDrawables.push_back(l3);
-        TLine *l4 = new TLine(w->tdcs_postpeak_high[i]*4, w->baseline, w->tdcs_postpeak_high[i]*4, w->baseline - w->charges_peak[i]);
+        TLine *l4 = new TLine(w->tdcs_postpeak_high[i]*4, w->baseline, w->tdcs_postpeak_high[i]*4, w->baseline - w->adcs_peak[i]);
         l4->SetLineColor(kMagenta-2);
         l4->Draw();
         listOfDrawables.push_back(l4);
-        TLine *l5 = new TLine(w->tdcs_thresh[i]*4, w->baseline, w->tdcs_thresh[i]*4, w->baseline - w->charges_peak[i]);
+        TLine *l5 = new TLine(w->tdcs_thresh[i]*4, w->baseline, w->tdcs_thresh[i]*4, w->baseline - w->adcs_peak[i]);
         l5->SetLineColor(kGray);
         l5->Draw();
         listOfDrawables.push_back(l5);
