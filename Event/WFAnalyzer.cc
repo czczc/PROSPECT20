@@ -90,7 +90,7 @@ void WFAnalyzer::ProcessBaseline()
 // ------------------------------------
 void WFAnalyzer::ProcessQT()
 {
-    vector<double> cleanTrace(wf_size);
+    vector<float> cleanTrace(wf_size);
     for (int i=0; i<wf_size; i++) {
         cleanTrace[i] = baseline - (*fWf)[i];
         // cout << cleanTrace[i] << " ";
@@ -100,16 +100,13 @@ void WFAnalyzer::ProcessQT()
     // calculate pulse with pulse finding of continuous area
 
 
-    double charge = 0;
-    double peak = 0;
-    double tdc = 0;
-    double tdc_start = 0;
-    double tdc_end = 0;
-    double tdc_peak = 0;
-    // double tdc_prepeak_low = 0;
-    // double tdc_prepeak_high = 0;
-    // double tdc_postpeak_low = 0;
-    // double tdc_postpeak_high = 0;
+    float charge = 0;
+    float peak = 0;
+    float tdc = 0;
+    float tdc_start = 0;
+    float tdc_end = 0;
+    float tdc_peak = 0;
+
     bool foundPulse = false;
     for (int i=1; i<wf_size-1; i++) {
         if (cleanTrace[i]>0 && cleanTrace[i+1]>0) {
@@ -139,8 +136,8 @@ void WFAnalyzer::ProcessQT()
                 tdcs_end.push_back(tdc_end);
                 tdcs_peak.push_back(tdc_peak);
 
-                double low_adc  = peak * LOW_PEAK_PERCENT / 100.;
-                double high_adc = peak * HIGH_PEAK_PERCENT / 100.;
+                float low_adc  = peak * LOW_PEAK_PERCENT / 100.;
+                float high_adc = peak * HIGH_PEAK_PERCENT / 100.;
 
                 int j = tdc_peak;
                 while (cleanTrace[j] > high_adc && j>tdc_start) j--;
@@ -170,6 +167,15 @@ void WFAnalyzer::ProcessQT()
         }
     }
     nPulse = charges_integral.size();
+
+    ordered_index = new int[nPulse];
+    TMath::Sort(nPulse, &(charges_integral[0]), ordered_index);
+
+}
+
+// ------------------------------------
+void WFAnalyzer::PrintInfo()
+{
     cout << "nPulse: " << nPulse << endl;
     for (int i=0; i< nPulse; i++) {
         cout << charges_integral[i] << " at (" << tdcs_start[i]*4 << ", " << tdcs_end[i]*4 << ") " 
@@ -181,10 +187,6 @@ void WFAnalyzer::ProcessQT()
         << endl;
     }
     cout << endl;
-
-    ordered_index = new int[nPulse];
-    TMath::Sort(nPulse, &(charges_integral[0]), ordered_index);
-
     cout << "ordered: ";
     for (int i=0; i<nPulse; i++) {
         cout << ordered_index[i] << ", ";

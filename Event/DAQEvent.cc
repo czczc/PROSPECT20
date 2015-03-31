@@ -40,7 +40,7 @@ DAQEvent::DAQEvent(const char* dataFileName)
     }
 
     nEvents = eventTree->GetEntries();
-    cout << "total events: " << nEvents << endl;
+    cout << dataFileName << ": total events: " << nEvents << endl;
 
     InitBranchAddress();
 }

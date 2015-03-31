@@ -12,7 +12,11 @@
     gROOT->ProcessLine( include + pwd + prefix );
     gROOT->ProcessLine( load + prefix + "/DAQEvent.cc+" );
     gROOT->ProcessLine( load + prefix + "/WFAnalyzer.cc+" );
-    // gROOT->ProcessLine( load + prefix + "/RecEvent.cc+" );
+    
+    prefix = "../TreeMaker";
+    gROOT->ProcessLine( include + pwd + prefix );
+    gROOT->ProcessLine( load + prefix + "/TQTree.cc+" );
+    gROOT->ProcessLine( load + prefix + "/TQStatsTree.cc+" );
 
     prefix = "../Viewer";
     gROOT->ProcessLine( include + pwd + prefix );
