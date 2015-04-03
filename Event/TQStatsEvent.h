@@ -1,40 +1,33 @@
-// Time and Charge Statistics Info Tree
-// chao@bnl.gov
-// "/Event/TQStats"
-
-#ifndef _TQSTATSTREE_
-#define _TQSTATSTREE_
-
-#define MAXPMT 2
-#define MAXMUONPADDLE 1
+#ifndef TQSTATSEVENT_H
+#define TQSTATSEVENT_H
 
 #include <vector>
-#include <map>
-#include "TString.h"
+#include "TTimeStamp.h"
 
-class TFile;
+#define MAXPMT 2
+
 class TTree;
-class DAQEvent;
+class TFile;
 
-class TQStatsTree {
+class TQStatsEvent
+{
 public:
-    TQStatsTree(const char* in="", const char* out="tqstatstree.root", int limit=-1);
-    virtual ~TQStatsTree();
+    TQStatsEvent(const char* dataFileName="");
+    virtual ~TQStatsEvent();
 
-    int fLimitEvents;
-    TString fInputFileName;
-    TString fOutputFileName;
-    TFile* fOutputFile;
-    TString treeName;
-    TString treeDirName;
-    TTree* fTQStatsTree;
-    DAQEvent* event;
-
-    void InitOutput();
-    void Generate();
+    TTree* EventTree()   { return eventTree; }
+    void InitBranchAddress();
+    void GetEntry(int entry);
     void Reset();
-    void Write();
+    void PrintInfo(int level=0);
 
+    TFile *rootFile;
+    TTree *eventTree;
+
+    unsigned int nEvents;
+    int currentEventEntry;
+
+    // eventTree branches   
     unsigned int eventNo;
     double trigTime; // The trigger time offset from start of run
 
@@ -59,9 +52,12 @@ public:
     float width_postpeak[MAXPMT];
     float width_tail[MAXPMT];
 
-    bool isMuonPaddleHit[MAXMUONPADDLE];
+    bool isMuonPaddleHit[1];
     bool isMuonPaddleAllHit;
     bool isMuon;
+
+    TTimeStamp ts; 
+
 };
 
-#endif 
+#endif

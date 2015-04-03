@@ -142,7 +142,7 @@ void TQTree::Generate(int pmtId)
         peakTdc = wfa.peakTdc;
         secondPeakTdc = wfa.secondPeakTdc;
 
-        for (int j=0; j<nPulse; j++) {
+        for (unsigned int j=0; j<nPulse; j++) {
             charges_integral->push_back(wfa.charges_integral[j]);
             adcs_peak->push_back(wfa.adcs_peak[j]);
             

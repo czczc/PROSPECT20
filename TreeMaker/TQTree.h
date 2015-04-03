@@ -32,9 +32,9 @@ public:
     void Reset();
     void Write();
 
-    int eventNo;
+    unsigned int eventNo;
     float baseline;
-    int nPulse;
+    unsigned int nPulse;
     float maxAdc;
     float secondCharge;
     float totalCharge;
