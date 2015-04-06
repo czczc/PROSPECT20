@@ -6,8 +6,7 @@
 
 #define MAXPMT 2
 
-class TTree;
-class TFile;
+class TChain;
 
 class TQStatsEvent
 {
@@ -15,14 +14,13 @@ public:
     TQStatsEvent(const char* dataFileName="");
     virtual ~TQStatsEvent();
 
-    TTree* EventTree()   { return eventTree; }
+    TChain* EventTree()   { return eventTree; }
     void InitBranchAddress();
     void GetEntry(int entry);
     void Reset();
     void PrintInfo(int level=0);
 
-    TFile *rootFile;
-    TTree *eventTree;
+    TChain *eventTree;
 
     unsigned int nEvents;
     int currentEventEntry;

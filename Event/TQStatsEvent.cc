@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "TFile.h"
-#include "TTree.h"
+#include "TChain.h"
 
 using namespace std;
 
@@ -13,13 +13,9 @@ TQStatsEvent::TQStatsEvent(const char* dataFileName)
 
     currentEventEntry = -1; // don't load event at initialization
 
-    rootFile = new TFile(dataFileName);
-    if (rootFile->IsZombie()) {
-        cout << "Data file " << dataFileName << " Does NOT exist! exiting ..." << endl;
-        exit(1);
-    }
+    eventTree = new TChain("/Event/TQStats");
+    eventTree->Add(dataFileName);
 
-    eventTree = (TTree*)rootFile->Get("/Event/TQStats");
     if (!eventTree) {
         cout << "TTee /Event/TQStats does NOT exist! exiting ..." << endl;
         exit(1);
@@ -34,8 +30,7 @@ TQStatsEvent::TQStatsEvent(const char* dataFileName)
 //----------------------------------------------------------------
 TQStatsEvent::~TQStatsEvent()
 {
-    rootFile->Close();
-    delete rootFile;
+    delete eventTree;
 }
 
 //----------------------------------------------------------------
