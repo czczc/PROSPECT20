@@ -7,6 +7,8 @@ class InfoWindow;
 class TGTextButton;
 class TGNumberEntryField;
 class TGCheckButton;
+class TGTextEntry;
+class TGPictureButton;
 
 class ControlWindow: public TGVerticalFrame
 {
@@ -23,6 +25,13 @@ public:
     TGTextButton       *fNextMuonButton;
     
     TGCheckButton      *showWFLinesButton;
+
+    // List of Events
+    TGTextEntry        *fLoEFileNameEntry;
+    TGPictureButton    *fLoEOpenFileButton;
+
+    TGTextButton       *fLoEPrevButton, *fLoENextButton;  
+    TGNumberEntryField *fLoEEventEntry;
 
     ClassDef(ControlWindow, 0)
 };

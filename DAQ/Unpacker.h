@@ -32,7 +32,9 @@ public:
     // branches   
     unsigned int fBoardId; // The Id of the digitizer board
     unsigned int fEventNo; // The event number
-    double fTrigTime; // The trigger time offset from start of run
+    double fTrigTime; // trigger unix timestamp
+    unsigned int fTrigTime_s;  // second part of the timestamp
+    unsigned int fTrigTime_ns;  // nanosecond part of the timestamp
 
     // Eventually add a list of boards used...
     // Not needed for now (we have only one board).

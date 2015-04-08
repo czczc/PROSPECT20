@@ -38,7 +38,8 @@ public:
     unsigned int channelMask; // The channel masking
     unsigned int channelSize; // The number of readouts per channel
     double trigTime; // The trigger time offset from start of run
-
+    unsigned int ts_s;  // second part of the timestamp
+    unsigned int ts_ns;  // nanosecond part of the timestamp
 
     std::vector<int>* channelIds; // The channel ids (should be same size as fEventData).
 

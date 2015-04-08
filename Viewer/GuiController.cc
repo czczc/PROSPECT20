@@ -26,6 +26,7 @@
 
 #include <exception>
 #include <iostream>
+#include <fstream>
 #include <map>
 using namespace std;
 
@@ -78,6 +79,9 @@ void GuiController::InitConnections()
     cw->fNextCIButton->Connect("Clicked()", "GuiController", this, "FindNextCoincidence()");
     cw->fNextMuonButton->Connect("Clicked()", "GuiController", this, "FindNextMuon()");
     cw->showWFLinesButton->Connect("Clicked()", "GuiController", this, "UpdateShowWFLines()");
+    cw->fLoEOpenFileButton->Connect("Clicked()", "GuiController", this, "OpenLoEFile()");
+    cw->fLoEPrevButton->Connect("Clicked()", "GuiController", this, "PrevSpecialEvent()");
+    cw->fLoENextButton->Connect("Clicked()", "GuiController", this, "NextSpecialEvent()");
 
 }
 
@@ -139,6 +143,11 @@ void GuiController::FindNextCoincidence()
         Next();
         counter++;
     }
+    // while ( (triggerTS[2].AsDouble()-triggerTS[1].AsDouble())*1e6 < 133.4 or 
+    //         (triggerTS[2].AsDouble()-triggerTS[1].AsDouble())*1e6 > 134.1) {
+    //     Next();
+    //     counter++;
+    // }
     if (counter == 200 ) {
         cout << "no coincidence found after 200 events." << endl;
     }
@@ -176,6 +185,7 @@ void GuiController::UpdateShowWFLines()
     // }
 
 }
+
 //-------------------------------------------------
 void GuiController::Reload()
 {    
@@ -354,19 +364,92 @@ void GuiController::InitEvent(const char* filename)
     Reload();
 }
 
+
+//-------------------------------------------------
+void GuiController::PrevSpecialEvent()
+{
+
+    if (currentSpecialEventIndex==0) {
+        currentSpecialEventIndex = listOfSpecialEvents.size()-1;
+    }
+    else {
+        currentSpecialEventIndex--;
+    }
+    currentEventEntry = listOfSpecialEvents.at(currentSpecialEventIndex);
+    cw->fLoEEventEntry->SetNumber(currentEventEntry);
+    Reload();
+}
+
+
+//-------------------------------------------------
+void GuiController::NextSpecialEvent()
+{
+    if (currentSpecialEventIndex == (int)listOfSpecialEvents.size()-1) {
+        currentSpecialEventIndex = 0;
+    }
+    else {
+        currentSpecialEventIndex++;
+    }
+    currentEventEntry = listOfSpecialEvents.at(currentSpecialEventIndex);
+    cw->fLoEEventEntry->SetNumber(currentEventEntry);
+    Reload();
+}
+
+//---------------------------------------------------
+void GuiController::OpenLoEFile()
+{
+    const char *filetypes[] = {"Text Files", "*", 0, 0};
+    TString currentDir(gSystem->WorkingDirectory());
+    TString dir(baseDir);
+    TGFileInfo fi;
+    fi.fFileTypes = filetypes;
+    fi.fIniDir    = StrDup(dir);
+    new TGFileDialog(gClient->GetRoot(), mw, kFDOpen, &fi);
+    gSystem->cd(currentDir.Data());
+
+    ifstream in(fi.fFilename);
+    if ( !in.is_open() ) {
+      cout << "file cannot be opened: " << fi.fFilename << endl;
+      return;
+    }
+
+    cout << "Loading list of events from file: " << fi.fFilename << endl;
+    listOfSpecialEvents.clear();
+    currentSpecialEventIndex = 0;
+    int entryNo;
+    while (!in.eof()) {
+        in >> entryNo;
+        if (entryNo == 0) {
+            cout << "invalid input found " << fi.fFilename << ". stopped reading list." << endl;
+            break;
+        }
+        listOfSpecialEvents.push_back(entryNo);
+        // cout << entryNo << endl;
+    }
+    in.close();
+    cout << listOfSpecialEvents.size() << " events read from event list: " << endl;
+    cout << "----------------------" << endl;
+    for (unsigned int i=0; i<listOfSpecialEvents.size(); i++) {
+        cout << listOfSpecialEvents[i] << " ";
+    }
+    cout << endl;
+}
+
 //---------------------------------------------------
 void GuiController::MenuOpen()
 {
     const char *filetypes[] = {"ROOT files", "*.root", 0, 0};
+    TString currentDir(gSystem->WorkingDirectory());
     TString dir(baseDir + "/data");
     TGFileInfo fi;
     fi.fFileTypes = filetypes;
     fi.fIniDir    = StrDup(dir);
     new TGFileDialog(gClient->GetRoot(), mw, kFDOpen, &fi);
     cout << "opening file: " << fi.fFilename << endl;
-
+    gSystem->cd(currentDir.Data());
     InitEvent(fi.fFilename);
 }
+
 
 //---------------------------------------------------
 void GuiController::HandleFileMenu(int id)
@@ -391,4 +474,6 @@ void GuiController::ClearListOfDrawables()
     }
     listOfDrawables.clear();
 }
+
+
 

@@ -44,6 +44,9 @@ void TQStatsTree::InitOutput()
 
     fTQStatsTree->Branch("eventNo", &eventNo, "eventNo/i");
     fTQStatsTree->Branch("trigTime", &trigTime, "trigTime/D");
+    fTQStatsTree->Branch("ts_s", &ts_s, "ts_s/i");
+    fTQStatsTree->Branch("ts_ns", &ts_ns, "ts_ns/i");
+
     fTQStatsTree->Branch("nPMT", &nPMT, "nPMT/i");
     fTQStatsTree->Branch("nPulse", &nPulse, "nPulse/i");
     fTQStatsTree->Branch("chargeSum", &chargeSum, "chargeSum/F");
@@ -117,6 +120,8 @@ void TQStatsTree::Generate()
         event->GetEntry(i);
         eventNo = event->eventNo;
         trigTime = event->trigTime;
+        ts_s = event->ts_s;
+        ts_ns = event->ts_ns;
 
         isMuonPaddleHit[0] = (event->channelData5->size() > 0);
         isMuonPaddleAllHit = (event->channelData6->size() > 0);

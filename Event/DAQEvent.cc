@@ -72,6 +72,8 @@ void DAQEvent::InitBranchAddress()
     eventTree->SetBranchAddress("channelData7", &channelData7);
 
     eventTree->SetBranchAddress("trigTime", &trigTime);
+    eventTree->SetBranchAddress("ts_s", &ts_s);
+    eventTree->SetBranchAddress("ts_ns", &ts_ns);
 }
 
 //----------------------------------------------------------------
@@ -85,8 +87,8 @@ void DAQEvent::GetEntry(int entry)
     Reset();
     eventTree->GetEntry(entry);
 
-    ts.SetSec(int(trigTime));
-    ts.SetNanoSec( int((trigTime-ts.GetSec())*1e9) );
+    ts.SetSec(ts_s);
+    ts.SetNanoSec(ts_ns);
 
     currentEventEntry = entry;
 }
@@ -96,7 +98,8 @@ void DAQEvent::PrintInfo(int level)
 {
     // cout << "event: (" << eventNo << "/" << nEvents << ")" << endl;
     cout << "event " << eventNo  
-         << " @ " << ts 
+    // << " @ " << ts.GetSec() << " + " << ts.GetNanoSec()
+    << " @ " << ts_s << " + " << ts_ns
          << endl;
     // print waveform
     if (level>0) {

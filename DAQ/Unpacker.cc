@@ -97,6 +97,8 @@ void Unpacker::InitOutput()
     // fOutputTree->Branch("channelTime", "vector<unsigned int>", &fChannelTime);
 
     fOutputTree->Branch("trigTime", &fTrigTime, "trigTime/D");
+    fOutputTree->Branch("ts_s",  &fTrigTime_s, "ts_s/i");
+    fOutputTree->Branch("ts_ns", &fTrigTime_ns, "ts_ns/i");
 
     gDirectory = tmpDir;
 
@@ -316,6 +318,12 @@ void Unpacker::ReadNextTrigger(ifstream& rawDataFile)
       + (unsigned int) (unsigned char) header3[1] * pow(16,2)
       + (unsigned int) (unsigned char) header3[0]);
     
+    // int tt = (unsigned char) header3[3] * pow(16,6)
+    //   + (unsigned int) (unsigned char) header3[2] * pow(16,4)
+    //   + (unsigned int) (unsigned char) header3[1] * pow(16,2)
+    //   + (unsigned int) (unsigned char) header3[0];
+    // cout << tt << endl;
+
     delete[] header0;
     delete[] header1;
     delete[] header2;
@@ -323,13 +331,19 @@ void Unpacker::ReadNextTrigger(ifstream& rawDataFile)
 
     // deltaTS = ((double)fTrigTime - oldTimeTag) * 8.e-9;
     if (fTrigTime < oldTimeTag) {
-        timeTagRollover ++;
+        timeTagRollover++;
         // deltaTS += (2**31)*8.e-9;
     }
     oldTimeTag = fTrigTime;
 
     fTrigTime += timeTagRollover*pow(2,31);  // add roll over offset
     fTrigTime *= 8e-9;  // convert to sec.
+
+    int part_s = (int)fTrigTime;
+    // cout << fTrigTime << endl;
+    fTrigTime_s =  (unsigned int)(fStartTime+part_s);
+    fTrigTime_ns = (unsigned int)((fTrigTime-part_s)*1e9);
+    // cout << fTrigTime_s << " " << fTrigTime_ns << endl;
     fTrigTime += fStartTime;  // convert to unix timestamp
 
     // Find the number of bytes saved per channel

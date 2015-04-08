@@ -42,6 +42,9 @@ public:
     void FindNextCoincidence();
     void FindNextMuon();
     void UpdateShowWFLines();
+    void OpenLoEFile();
+    void PrevSpecialEvent();
+    void NextSpecialEvent();
 
     void DrawWF(std::vector<unsigned short>& ch, int wfNo, int padNo);
     void DrawPulses(int wfNo, int padNo);
@@ -65,10 +68,13 @@ public:
     DAQEvent       *event;
     WFAnalyzer     wfa[2];  // for the two PMTs.
 
+    std::vector<int> listOfSpecialEvents;
+    int currentSpecialEventIndex;
+
     TCanvas *can;
     TString baseDir;
     int currentEventEntry;
-    vector<TObject*> listOfDrawables;
+    std::vector<TObject*> listOfDrawables;
 
 };
 

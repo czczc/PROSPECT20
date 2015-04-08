@@ -37,7 +37,9 @@ public:
 
     unsigned int eventNo;
     double trigTime; // The trigger time offset from start of run
-
+    unsigned int ts_s;  // second part of the timestamp
+    unsigned int ts_ns;  // nanosecond part of the timestamp
+    
     unsigned int nPMT;         // number of hit PMTs
     unsigned int nPulse;       // number of total pulses
     float chargeSum;  // charge1 + charge2

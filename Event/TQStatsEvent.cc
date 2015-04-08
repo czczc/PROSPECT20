@@ -38,6 +38,8 @@ void TQStatsEvent::InitBranchAddress()
 {
     eventTree->SetBranchAddress("eventNo", &eventNo);
     eventTree->SetBranchAddress("trigTime", &trigTime);
+    eventTree->SetBranchAddress("ts_s", &ts_s);
+    eventTree->SetBranchAddress("ts_ns", &ts_ns);
 
     eventTree->SetBranchAddress("nPMT", &nPMT);
     eventTree->SetBranchAddress("nPulse", &nPulse);
@@ -88,8 +90,8 @@ void TQStatsEvent::GetEntry(int entry)
     Reset();
     eventTree->GetEntry(entry);
 
-    ts.SetSec(int(trigTime));
-    ts.SetNanoSec( int((trigTime-ts.GetSec())*1e9) );
+    ts.SetSec(ts_s);
+    ts.SetNanoSec(ts_ns);
 
     currentEventEntry = entry;
 }
